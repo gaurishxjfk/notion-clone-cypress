@@ -1,6 +1,7 @@
-'use client'
+"use client";
 import { AuthUser } from "@supabase/supabase-js";
 import React, { useState } from "react";
+import { v4 } from "uuid";
 import {
   Card,
   CardContent,
@@ -15,8 +16,15 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { CreateWorkspaceFormSchema } from "@/lib/types";
 import { z } from "zod";
 import Loader from "../global/loader";
-import { Subscription } from "@/lib/supabase/supabase.types";
+import { Subscription, workspace } from "@/lib/supabase/supabase.types";
 import EmojiPicker from "../global/emoji-picker";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { useToast } from "../ui/use-toast";
+import { createWorkspace } from "@/lib/supabase/queries";
+import { useRouter } from "next/navigation";
+import { useAppState } from "@/lib/providers/state-provider";
+import db from "@/lib/supabase/db";
+import { workspaces } from "../../../migrations/schema";
 
 interface DashboardSetupProps {
   user: AuthUser;
@@ -26,7 +34,11 @@ const DashboardSetup: React.FC<DashboardSetupProps> = ({
   subscription,
   user,
 }) => {
-  const [selectedEmoji, setSelectedEmoji] = useState('💼');
+  const [selectedEmoji, setSelectedEmoji] = useState("💼");
+  const router = useRouter();
+  const { dispatch } = useAppState();
+  const { toast } = useToast();
+  const supabase = createClientComponentClient();
   const {
     register,
     handleSubmit,
@@ -43,8 +55,73 @@ const DashboardSetup: React.FC<DashboardSetupProps> = ({
   const onSubmit: SubmitHandler<
     z.infer<typeof CreateWorkspaceFormSchema>
   > = async (value) => {
+    const file = value.logo?.[0];
+    let filePath = null;
+    const workspaceUUID = v4();
+    console.log(file, "==dsad==", workspaceUUID);
 
-  }
+    if (file) {
+      try {
+        const { data, error } = await supabase.storage
+          .from("workspace-logos")
+          .upload(`workspaceLogo.${workspaceUUID}`, file, {
+            cacheControl: "3600",
+            upsert: true,
+          });
+        if (error) throw new Error("");
+        filePath = data.path;
+      } catch (error) {
+        console.log("Error", error);
+        toast({
+          variant: "destructive",
+          title: "Error! Could not upload your workspace logo",
+        });
+      }
+    }
+
+    console.log(filePath, "==222==");
+    try {
+      const newWorkspace: workspace = {
+        data: null,
+        createdAt: new Date().toISOString(),
+        iconId: selectedEmoji,
+        id: workspaceUUID,
+        inTrash: "",
+        title: value.workspaceName,
+        workspaceOwner: user.id,
+        logo: filePath || null,
+        bannerUrl: "",
+      };
+      console.log(newWorkspace)
+      //const response = await db.insert(workspaces).values(newWorkspace);
+      //console.log(response)
+      const { data, error: createError } = await createWorkspace(newWorkspace);
+      if (createError) {
+        throw new Error();
+      }
+      dispatch({
+        type: "ADD_WORKSPACE",
+        payload: { ...newWorkspace, folders: [] },
+      });
+
+      toast({
+        title: "Workspace Created",
+        description: `${newWorkspace.title} has been created successfully.`,
+      });
+
+      router.replace(`/dashboard/${newWorkspace.id}`);
+    } catch (error) {
+      console.log(error, "Error");
+      toast({
+        variant: "destructive",
+        title: "Could not create your workspace",
+        description:
+          "Oops! Something went wrong, and we couldn't create your workspace. Try again or come back later.",
+      });
+    } finally {
+      reset();
+    }
+  };
   return (
     <Card className="w-[800px] h-screen sm:h-auto ">
       <CardHeader>
@@ -87,10 +164,7 @@ const DashboardSetup: React.FC<DashboardSetupProps> = ({
               </div>
             </div>
             <div>
-              <Label
-                htmlFor="logo"
-                className="text-sm text-muted-foreground"
-              >
+              <Label htmlFor="logo" className="text-sm text-muted-foreground">
                 Workspace Logo
               </Label>
               <Input
