@@ -58,7 +58,6 @@ const DashboardSetup: React.FC<DashboardSetupProps> = ({
     const file = value.logo?.[0];
     let filePath = null;
     const workspaceUUID = v4();
-    console.log(file, "==dsad==", workspaceUUID);
 
     if (file) {
       try {
@@ -79,7 +78,6 @@ const DashboardSetup: React.FC<DashboardSetupProps> = ({
       }
     }
 
-    console.log(filePath, "==222==");
     try {
       const newWorkspace: workspace = {
         data: null,
@@ -92,7 +90,6 @@ const DashboardSetup: React.FC<DashboardSetupProps> = ({
         logo: filePath || null,
         bannerUrl: "",
       };
-      console.log(newWorkspace)
       //const response = await db.insert(workspaces).values(newWorkspace);
       //console.log(response)
       const { data, error: createError } = await createWorkspace(newWorkspace);
