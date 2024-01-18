@@ -8,7 +8,7 @@ import React, {
   useMemo,
   useReducer,
 } from "react";
-import { Folder, workspace } from "../supabase/supabase.types";
+import { File, Folder, workspace } from "../supabase/supabase.types";
 
 export type appFoldersType = Folder & { files: File[] | [] };
 export type appWorkspacesType = workspace & {
@@ -194,83 +194,83 @@ const appReducer = (
           return workspace;
         }),
       };
-    // case 'ADD_FILE':
-    //   return {
-    //     ...state,
-    //     workspaces: state.workspaces.map((workspace) => {
-    //       if (workspace.id === action.payload.workspaceId) {
-    //         return {
-    //           ...workspace,
-    //           folders: workspace.folders.map((folder) => {
-    //             if (folder.id === action.payload.folderId) {
-    //               return {
-    //                 ...folder,
-    //                 files: [...folder.files, action.payload.file].sort(
-    //                   (a, b) =>
-    //                     new Date(a.createdAt).getTime() -
-    //                     new Date(b.createdAt).getTime()
-    //                 ),
-    //               };
-    //             }
-    //             return folder;
-    //           }),
-    //         };
-    //       }
-    //       return workspace;
-    //     }),
-    //   };
-    // case 'DELETE_FILE':
-    //   return {
-    //     ...state,
-    //     workspaces: state.workspaces.map((workspace) => {
-    //       if (workspace.id === action.payload.workspaceId) {
-    //         return {
-    //           ...workspace,
-    //           folder: workspace.folders.map((folder) => {
-    //             if (folder.id === action.payload.folderId) {
-    //               return {
-    //                 ...folder,
-    //                 files: folder.files.filter(
-    //                   (file) => file.id !== action.payload.fileId
-    //                 ),
-    //               };
-    //             }
-    //             return folder;
-    //           }),
-    //         };
-    //       }
-    //       return workspace;
-    //     }),
-    //   };
-    // case 'UPDATE_FILE':
-    //   return {
-    //     ...state,
-    //     workspaces: state.workspaces.map((workspace) => {
-    //       if (workspace.id === action.payload.workspaceId) {
-    //         return {
-    //           ...workspace,
-    //           folders: workspace.folders.map((folder) => {
-    //             if (folder.id === action.payload.folderId) {
-    //               return {
-    //                 ...folder,
-    //                 files: folder.files.map((file) => {
-    //                   if (file.id === action.payload.fileId) {
-    //                     return {
-    //                       ...file,
-    //                       ...action.payload.file,
-    //                     };
-    //                   }
-    //                   return file;
-    //                 }),
-    //               };
-    //             }
-    //             return folder;
-    //           }),
-    //         };
-    //       }
-    //       return workspace;
-    //     }),
-    //   };
+    case 'ADD_FILE':
+      return {
+        ...state,
+        workspaces: state.workspaces.map((workspace) => {
+          if (workspace.id === action.payload.workspaceId) {
+            return {
+              ...workspace,
+              folders: workspace.folders.map((folder) => {
+                if (folder.id === action.payload.folderId) {
+                  return {
+                    ...folder,
+                    files: [...folder.files, action.payload.file].sort(
+                      (a, b) =>
+                        new Date(a.createdAt).getTime() -
+                        new Date(b.createdAt).getTime()
+                    ),
+                  };
+                }
+                return folder;
+              }),
+            };
+          }
+          return workspace;
+        }),
+      };
+    case 'DELETE_FILE':
+      return {
+        ...state,
+        workspaces: state.workspaces.map((workspace) => {
+          if (workspace.id === action.payload.workspaceId) {
+            return {
+              ...workspace,
+              folder: workspace.folders.map((folder) => {
+                if (folder.id === action.payload.folderId) {
+                  return {
+                    ...folder,
+                    files: folder.files.filter(
+                      (file) => file.id !== action.payload.fileId
+                    ),
+                  };
+                }
+                return folder;
+              }),
+            };
+          }
+          return workspace;
+        }),
+      };
+    case 'UPDATE_FILE':
+      return {
+        ...state,
+        workspaces: state.workspaces.map((workspace) => {
+          if (workspace.id === action.payload.workspaceId) {
+            return {
+              ...workspace,
+              folders: workspace.folders.map((folder) => {
+                if (folder.id === action.payload.folderId) {
+                  return {
+                    ...folder,
+                    files: folder.files.map((file) => {
+                      if (file.id === action.payload.fileId) {
+                        return {
+                          ...file,
+                          ...action.payload.file,
+                        };
+                      }
+                      return file;
+                    }),
+                  };
+                }
+                return folder;
+              }),
+            };
+          }
+          return workspace;
+        }),
+      };
     default:
       return initialState;
   }
