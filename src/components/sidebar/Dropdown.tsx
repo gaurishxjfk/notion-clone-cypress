@@ -236,7 +236,64 @@ const Dropdown: React.FC<DropdownProps> = ({
   };
 
   //move to trash
-  const moveToTrash = async () => {};
+  const moveToTrash = async () => {
+    if (!user?.email || !workspaceId) return;
+    const pathId = id.split('folder');
+    if (listType === 'folder') {
+        dispatch({
+          type: 'UPDATE_FOLDER',
+          payload: {
+            folder: { inTrash: `Deleted by ${user?.email}` },
+            folderId: pathId[0],
+            workspaceId,
+          },
+        });
+        const { data, error } = await updateFolder(
+          { inTrash: `Deleted by ${user?.email}` },
+          pathId[0]
+        );
+        if (error) {
+          toast({
+            title: 'Error',
+            variant: 'destructive',
+            description: 'Could not move the folder to trash',
+          });
+        } else {
+          toast({
+            title: 'Success',
+            description: 'Moved folder to trash',
+          });
+        }
+      }
+
+      if (listType === 'file') {
+        dispatch({
+          type: 'UPDATE_FILE',
+          payload: {
+            file: { inTrash: `Deleted by ${user?.email}` },
+            folderId: pathId[0],
+            workspaceId,
+            fileId: pathId[1],
+          },
+        });
+        const { data, error } = await updateFile(
+          { inTrash: `Deleted by ${user?.email}` },
+          pathId[1]
+        );
+        if (error) {
+          toast({
+            title: 'Error',
+            variant: 'destructive',
+            description: 'Could not move the folder to trash',
+          });
+        } else {
+          toast({
+            title: 'Success',
+            description: 'Moved folder to trash',
+          });
+        }
+      }
+  };
   return (
     <AccordionItem
       value={id}
@@ -271,6 +328,7 @@ const Dropdown: React.FC<DropdownProps> = ({
               )}
               readOnly={!isEditing}
               onDoubleClick={handleDoubleClick}
+              onKeyDown={(e) => e.key === "Enter" && handleBlur()}
               onBlur={handleBlur}
               onChange={
                 listType === "folder" ? folderTitleChange : fileTitleChange
