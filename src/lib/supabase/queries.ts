@@ -303,3 +303,34 @@ export const getCollaborators = async (workspaceId: string) => {
   const resolvedUsers = await Promise.all(userInformation);
   return resolvedUsers.filter(Boolean) as User[];
 };
+
+export const getWorkspaceDetails = async (workspaceId: string) => {
+  const isValid = validate(workspaceId);
+  if (!isValid)
+    return {
+      data: [],
+      error: "Error",
+    };
+
+  try {
+    const response = (await db
+      .select()
+      .from(workspaces)
+      .where(eq(workspaces.id, workspaceId))
+      .limit(1)) as workspace[];
+    return { data: response, error: null };
+  } catch (error) {
+    console.log(error);
+    return { data: [], error: "Error" };
+  }
+};
+
+export const deleteFile = async (fileId: string) => {
+  if (!fileId) return;
+  await db.delete(files).where(eq(files.id, fileId));
+};
+
+export const deleteFolder = async (folderId: string) => {
+  if (!folderId) return;
+  await db.delete(files).where(eq(files.id, folderId));
+};

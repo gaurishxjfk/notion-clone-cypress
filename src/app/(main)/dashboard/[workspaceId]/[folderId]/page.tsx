@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 import React from 'react';
 import { getFolderDetails } from '@/lib/supabase/queries';
 import { redirect } from 'next/navigation';
+import QuillEditor from '@/components/quill-editor/quill-editor';
 
 const Folder = async ({ params }: { params: { folderId: string } }) => {
   const { data, error } = await getFolderDetails(params.folderId);
@@ -10,7 +11,11 @@ const Folder = async ({ params }: { params: { folderId: string } }) => {
 
   return (
     <div className="relative ">
-      sfafsa
+      <QuillEditor
+        dirType="folder"
+        fileId={params.folderId}
+        dirDetails={data[0] || {}}
+      />
     </div>
   );
 };
