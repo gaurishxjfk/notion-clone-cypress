@@ -334,3 +334,10 @@ export const deleteFolder = async (folderId: string) => {
   if (!folderId) return;
   await db.delete(files).where(eq(files.id, folderId));
 };
+
+export const findUser = async (userId: string) => {
+  const response = await db.query.users.findFirst({
+    where: (u, { eq }) => eq(u.id, userId),
+  });
+  return response;
+};
