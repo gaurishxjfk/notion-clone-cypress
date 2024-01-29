@@ -53,11 +53,13 @@ import { ScrollArea } from "../ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Alert, AlertDescription } from "../ui/alert";
 import Link from "next/link";
+import { useSubscriptionModal } from "@/lib/providers/subscription-modal-provider";
+import { postData } from "@/lib/utils";
 
 const SettingsForm = () => {
   const { toast } = useToast();
   const { user, subscription } = useSupabaseUser();
-  // const { open, setOpen } = useSubscriptionModal();
+  const { open, setOpen } = useSubscriptionModal();
   const router = useRouter();
   const supabase = createClientComponentClient();
   const { state, workspaceId, dispatch } = useAppState();
@@ -70,10 +72,24 @@ const SettingsForm = () => {
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [loadingPortal, setLoadingPortal] = useState(false);
 
+  const redirectToCustomerPortal = async () => {
+    setLoadingPortal(true);
+    try {
+      const { url, error } = await postData({
+        url: "/api/create-portal-link",
+      });
+      window.location.assign(url);
+    } catch (error) {
+      console.log(error);
+      setLoadingPortal(false);
+    }
+    setLoadingPortal(false);
+  };
+
   const addCollaborator = async (profile: User) => {
     if (!workspaceId) return;
     if (subscription?.status !== "active" && collaborators.length >= 2) {
-      // setOpen(true);
+      setOpen(true);
       return;
     }
     await addCollaborators([profile], workspaceId);
@@ -369,7 +385,7 @@ const SettingsForm = () => {
               variant={"secondary"}
               disabled={loadingPortal}
               className="text-sm"
-              // onClick={redirectToCustomerPortal}
+              onClick={redirectToCustomerPortal}
             >
               Manage Subscription
             </Button>
@@ -381,7 +397,7 @@ const SettingsForm = () => {
               size="sm"
               variant={"secondary"}
               className="text-sm"
-              // onClick={() => setOpen(true)}
+              onClick={() => setOpen(true)}
             >
               Start Plan
             </Button>
