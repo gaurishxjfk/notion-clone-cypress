@@ -11,16 +11,49 @@ import {
 import { useSupabaseUser } from "@/lib/providers/supabase-user-provider";
 import { Button } from "../ui/button";
 import Loader from "./loader";
-import { Price } from "@/lib/supabase/supabase.types";
-import { formatPrice } from "@/lib/utils";
+import { Price, ProductWirhPrice } from "@/lib/supabase/supabase.types";
+import { formatPrice, postData } from "@/lib/utils";
+import { useToast } from "../ui/use-toast";
+import { getStripe } from "@/lib/stripe/stripeClient";
 
-const SubscriptionModal = () => {
-  const products: any = [];
+interface SubscriptionModalProps {
+  products: ProductWirhPrice[];
+}
+
+const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ products }) => {
   const { open, setOpen } = useSubscriptionModal();
   const { subscription, user } = useSupabaseUser();
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
-  const onClickContinue = async (price: Price) => {};
+  const onClickContinue = async (price: Price) => {
+    try {
+      setIsLoading(true);
+      if (!user) {
+        toast({ title: "You must be logged in" });
+        setIsLoading(false);
+        return;
+      }
+      if (subscription) {
+        toast({ title: "Already on a paid plan" });
+        setIsLoading(false);
+        return;
+      }
+      const { sessionId } = await postData({
+        url: "/api/create-checkout-session",
+        data: { price },
+      });
+
+      console.log("Getting Checkout for stripe");
+      const stripe = await getStripe();
+      stripe?.redirectToCheckout({ sessionId });
+    } catch (error) {
+      toast({ title: "Oppse! Something went wrong.", variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {subscription?.status === "active" ? (
