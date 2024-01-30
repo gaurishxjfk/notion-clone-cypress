@@ -1,4 +1,4 @@
-# myWorkspace
+# cypress-workspace
 
 ##Live Demo : https://myworkspace.up.railway.app/
 
@@ -14,7 +14,7 @@
 
 ## Introduction
 
-Welcome to the myWorkspace project! This collaborative productivity platform is inspired by Notion, allowing users to create, update, and delete workspaces, folders, and files. Users can also add collaborators and work simultaneously in real-time.
+Welcome to the cypress-workspace project! This collaborative productivity platform is inspired by Notion, allowing users to create, update, and delete workspaces, folders, and files. Users can also add collaborators and work simultaneously in real-time.
 
 ## Features
 
